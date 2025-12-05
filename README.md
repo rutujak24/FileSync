@@ -24,7 +24,7 @@ Automatic re-sync if server/client restarts.
 Heartbeat/Node health check for fault tolerance.
 
 
-###10-Day Plan
+### 10-Day Plan
 
 Day 1 – Architecture & Model Selection
 
