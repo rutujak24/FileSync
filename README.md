@@ -26,68 +26,66 @@ Heartbeat/Node health check for fault tolerance.
 
 ### 10-Day Plan
 
-Day 1 – Architecture & Model Selection
+Day 1 – System Design & Architecture
 
-Decide LLM (open-source: LLaMA, MPT) or API (OpenAI).
+Define module diagram: Client, Server, Sync Manager, Metadata DB.
 
-Design pipeline: Ingest → Preprocess → Summarize → Query → Respond.
+Choose communication protocol (gRPC/ZeroMQ).
 
-Day 2 – Document Preprocessing
+Define file versioning schema.
 
-Extract text from PDF/DOCX/TXT.
+Day 2 – Setup Project & Core Framework
 
-Implement chunking for long docs.
+Setup C++ project structure with CMake.
 
-Basic cleaning (remove newlines, special chars).
+Implement basic Client ↔ Server connection.
 
-Day 3 – Summarization Module
+Test simple file upload/download.
 
-Integrate LLM for summarization.
+Day 3 – File Metadata Management
 
-Test paragraph-level and full-doc summarization.
+Implement metadata DB (JSON/SQLite).
 
-Day 4 – QA Module
+Track file versions, timestamps, and last-modified.
 
-Implement embedding-based retrieval (FAISS or LangChain).
+Day 4 – Conflict Detection & Resolution
 
-Query document chunks and get LLM answer.
+Detect conflicts when multiple clients modify the same file.
 
-Day 5 – Fine-Tuning / Prompt Engineering
+Implement resolution strategies: last-write-wins, manual merge logs.
 
-Test different prompts for better summary/QA quality.
+Day 5 – Multi-Node Sync
 
-Optional: small fine-tune on domain-specific docs.
+Add multiple servers with replication.
 
-Day 6 – API & Backend Setup
+Implement heartbeat mechanism for server availability.
 
-Build REST API (FastAPI/Flask) for:
+Day 6 – File Transfer Optimization
 
-Upload document
+Use chunked file transfer for large files.
 
-Get summary
+Add optional compression.
 
-Ask question
+Day 7 – Fault Tolerance & Recovery
 
-Day 7 – Frontend
+Auto-resync after client/server crash.
 
-Build simple React UI:
+Test server failover and replication.
 
-Upload file, display summary, input question → display answer.
+Day 8 – Minimal Frontend
 
-Day 8 – Hosting & Deployment
+CLI or lightweight Qt/ImGui GUI to:
 
-Dockerize backend + frontend.
+Show sync status, upload/download files, resolve conflicts.
 
-Deploy on AWS/GCP/Render.
+Day 9 – Hosting & Testing
 
-Day 9 – Testing & Optimization
+Setup Docker for server nodes.
 
-Test with multiple docs.
+Test distributed setup on multiple local or cloud VMs.
 
-Optimize chunking, response speed, memory usage.
+Day 10 – Polish & Documentation
 
-Day 10 – Documentation & GitHub
+Create GitHub repo with README, diagrams, usage guide.
 
-Write README: setup, usage, architecture, sample docs.
-
-Add sample screenshots and hosted link demo.
+Add logging, error handling, and example scripts.
