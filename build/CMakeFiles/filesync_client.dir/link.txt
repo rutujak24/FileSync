@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/filesync_client.dir/src/client/main.cpp.o CMakeFiles/filesync_client.dir/src/client/client.cpp.o -o filesync_client  libfilesync_proto.a libcrdt_proto.a -lgrpc++ -lgrpc -lgpr -lprotobuf 

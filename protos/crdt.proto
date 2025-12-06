@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package filesync;
+
+service CRDTService {
+  // Client -> Server or Server -> Server: Apply a CRDT update
+  rpc ApplyCRDTUpdate(CRDTUpdate) returns (CRDTResponse);
+  
+  // Get the current CRDT state for a file
+  rpc GetCRDTState(CRDTStateRequest) returns (CRDTStateResponse);
+}
+
+message CRDTUpdate {
+  string file_name = 1;
+  string client_id = 2;
+  bytes operation = 3; // Serialized CRDT operation (e.g., insert/delete)
+  int64 timestamp = 4;
+}
+
+message CRDTResponse {
+  bool success = 1;
+  int64 current_version = 2;
+}
+
+message CRDTStateRequest {
+  string file_name = 1;
+}
+
+message CRDTStateResponse {
+  bytes state = 1; // Full serialized CRDT state
+  int64 version = 2;
+}
