@@ -1,6 +1,0 @@
-/home/rutuja/Projects/FileSync/build/CMakeFiles/filesync_proto.dir
-/home/rutuja/Projects/FileSync/build/CMakeFiles/crdt_proto.dir
-/home/rutuja/Projects/FileSync/build/CMakeFiles/filesync_server.dir
-/home/rutuja/Projects/FileSync/build/CMakeFiles/filesync_client.dir
-/home/rutuja/Projects/FileSync/build/CMakeFiles/edit_cache.dir
-/home/rutuja/Projects/FileSync/build/CMakeFiles/rebuild_cache.dir

@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/filesync_server.dir/src/server/main.cpp.o CMakeFiles/filesync_server.dir/src/server/server.cpp.o CMakeFiles/filesync_server.dir/src/db/db_manager.cpp.o -o filesync_server  libfilesync_proto.a libcrdt_proto.a /usr/lib/x86_64-linux-gnu/libsqlite3.so -lgrpc++ -lgrpc -lgpr -lprotobuf 

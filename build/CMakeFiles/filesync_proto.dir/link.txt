@@ -1,2 +1,0 @@
-/usr/bin/ar qc libfilesync_proto.a CMakeFiles/filesync_proto.dir/protos/filesync.pb.cc.o CMakeFiles/filesync_proto.dir/protos/filesync.grpc.pb.cc.o
-/usr/bin/ranlib libfilesync_proto.a

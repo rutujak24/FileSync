@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcrdt_proto.a CMakeFiles/crdt_proto.dir/protos/crdt.pb.cc.o CMakeFiles/crdt_proto.dir/protos/crdt.grpc.pb.cc.o
-/usr/bin/ranlib libcrdt_proto.a

@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-afe96c8051b72e7d874661e6ed83ba94 protos/crdt.pb.h
-2a679cbe4b60748837d78220a351884f protos/filesync.pb.h
