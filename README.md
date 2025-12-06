@@ -1,91 +1,63 @@
-# FileSync
-Distributed File Synchronization System
+# FileSync++: A Distributed, Fault-Tolerant, CRDT-Enhanced, Erasure-Coded File Synchronization System
 
-Goal: Sync files across multiple nodes with versioning, conflict resolution, and fault tolerance.
+*FileSync++* is a high-performance, multi-node file synchronization platform designed in **C++** and built on **gRPC microservices**. The system enables reliable file uploads, downloads, metadata/version management, and cross-node propagation, similar to Google Drive or Dropbox — but with two advanced features that traditional file-sync products do not provide:
 
-Architecture Overview
+### **1. CRDT-Based Conflict-Free Merging for Text Files**
 
-Client-Server Model:
+Unlike conventional cloud storage systems that resolve concurrent edits using simple last-write-wins (LWW), FileSync++ integrates a **Conflict-Free Replicated Data Type (CRDT)** engine for text documents. This enables **real-time, conflict-free merging** even when multiple clients edit the same file offline. Divergent file states automatically converge without data loss, enabling true collaborative editing.
 
-Server Nodes: Store file replicas, manage metadata, handle sync requests.
+### **2. Erasure Coding for Storage Efficiency and High Durability**
 
-Clients: Upload/download files.
+Instead of maintaining full replicas across storage nodes, FileSync++ supports **Reed–Solomon erasure coding (k data shards + m parity shards)**. Files are split into encoded fragments and distributed across nodes, providing **fault tolerance equivalent to replication** but with **significantly lower storage overhead**. Any subset of *k* fragments can reconstruct the full file, making the system highly durable even under node failures.
 
-Communication: gRPC or ZeroMQ (C++).
+FileSync++ also provides:
 
-Persistence: Local file system + JSON/SQLite metadata.
+* Multi-node eventual sync
+* Server-to-server metadata/patch propagation
+* Chunk-based file streaming
+* Metadata tracking via SQLite
+* Heartbeat-based failure detection
+* Optional user-facing CLI or minimal web UI
 
-Features:
+This project demonstrates expertise in **distributed systems, C++ systems engineering, consensus-free replication, fault tolerance, CRDT theory, and storage coding**.
 
-File versioning and conflict resolution.
+---
 
-Automatic re-sync if server/client restarts.
+# 🌟 **Updated System Architecture (with CRDT + Erasure Coding)**
 
-Heartbeat/Node health check for fault tolerance.
+## **Core Components**
 
+1. **Client**
 
-### 10-Day Plan
+   * Upload/download files via gRPC
+   * Compute local diffs and hashes
+   * CRDT-enabled editor for text files
+   * Chunker + encoder for upload
 
-Day 1 – System Design & Architecture
+2. **Server Node**
 
-Define module diagram: Client, Server, Sync Manager, Metadata DB.
+   * File chunk storage
+   * Metadata store (SQLite)
+   * Erasure coding module
+   * CRDT merge engine (for text)
+   * File reconstruction module
+   * Server-to-server sync RPC handlers
 
-Choose communication protocol (gRPC/ZeroMQ).
+3. **Sync Manager**
 
-Define file versioning schema.
+   * Watches metadata changes
+   * Broadcasts updates to peer nodes
+   * Manages background erasure coding sync jobs
+   * Pulls missing shards
 
-Day 2 – Setup Project & Core Framework
+4. **Distributed Storage Layer**
 
-Setup C++ project structure with CMake.
+   * Stores (k+m) encoded shards
+   * Reconstructs files when needed
+   * Integrates with metadata DB
 
-Implement basic Client ↔ Server connection.
+5. **Cluster Manager**
 
-Test simple file upload/download.
-
-Day 3 – File Metadata Management
-
-Implement metadata DB (JSON/SQLite).
-
-Track file versions, timestamps, and last-modified.
-
-Day 4 – Conflict Detection & Resolution
-
-Detect conflicts when multiple clients modify the same file.
-
-Implement resolution strategies: last-write-wins, manual merge logs.
-
-Day 5 – Multi-Node Sync
-
-Add multiple servers with replication.
-
-Implement heartbeat mechanism for server availability.
-
-Day 6 – File Transfer Optimization
-
-Use chunked file transfer for large files.
-
-Add optional compression.
-
-Day 7 – Fault Tolerance & Recovery
-
-Auto-resync after client/server crash.
-
-Test server failover and replication.
-
-Day 8 – Minimal Frontend
-
-CLI or lightweight Qt/ImGui GUI to:
-
-Show sync status, upload/download files, resolve conflicts.
-
-Day 9 – Hosting & Testing
-
-Setup Docker for server nodes.
-
-Test distributed setup on multiple local or cloud VMs.
-
-Day 10 – Polish & Documentation
-
-Create GitHub repo with README, diagrams, usage guide.
-
-Add logging, error handling, and example scripts.
+   * Tracks server heartbeats
+   * Detects node failures
+   * Rebalances shards if node dies
