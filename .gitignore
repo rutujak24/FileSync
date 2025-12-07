@@ -1,0 +1,10 @@
+build/
+.vscode/
+.idea/
+*.db
+*.o
+*.a
+*.so
+*.dylib
+filesync_client
+filesync_server
