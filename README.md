@@ -4,17 +4,17 @@
 
 ## Key Features
 
-### 1. 🔄 Bidirectional File Sync
+### 1. Bidirectional File Sync
 Automatically synchronizes files between the client and server.
 -   **Smart Sync**: Only transfers files that are missing or changed.
 -   **Efficient**: Uses SHA256 hashing to detect changes.
 
-### 2. 📝 Real-Time Collaborative Editing (CRDT)
+### 2. Real-Time Collaborative Editing (CRDT)
 Supports conflict-free text editing. Multiple users can edit the same file, and the system ensures that everyone sees the same final result without merge conflicts.
 -   **Algorithm**: Implements **RGA (Replicated Growable Array)**.
 -   **Conflict-Free**: Mathematical guarantee of eventual consistency.
 
-### 3. 🛡️ Fault Tolerance (Replication)
+### 3. Fault Tolerance (Replication)
 Ensures your data is safe even if a disk fails.
 -   **Primary-Backup Replication**: Every uploaded file is saved to two separate storage locations (`storage/primary` and `storage/backup`).
 -   **Automatic Failover**: If the primary file is lost, the server automatically retrieves it from the backup.
