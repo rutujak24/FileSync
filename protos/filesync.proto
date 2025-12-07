@@ -9,15 +9,6 @@ service FileSyncService {
   // Client -> Server: Download a file (chunked streaming)
   rpc DownloadFile(FileRequest) returns (stream FileChunk);
 
-  // Server -> Server: Propagate metadata updates
-  rpc PropagateMeta(MetadataUpdate) returns (PropagateResponse);
-
-  // Server -> Server: Fetch a specific shard for reconstruction
-  rpc FetchShard(ShardRequest) returns (ShardData);
-
-  // Server -> Server: Heartbeat for failure  // Heartbeat check
-  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
-
   // List all files (for Sync)
   rpc ListFiles(ListFilesRequest) returns (FileListResponse);
 }
@@ -39,41 +30,6 @@ message UploadResponse {
 
 message FileRequest {
   string file_name = 1;
-}
-
-message MetadataUpdate {
-  string file_name = 1;
-  int64 version = 2;
-  string file_hash = 3;
-  int64 timestamp = 4;
-  bool is_deleted = 5;
-  // Erasure coding metadata
-  int32 k_shards = 6;
-  int32 m_shards = 7;
-  map<int32, string> shard_locations = 8; // shard_index -> node_address
-}
-
-message PropagateResponse {
-  bool success = 1;
-}
-
-message ShardRequest {
-  string file_name = 1;
-  int32 shard_index = 2;
-}
-
-message ShardData {
-  bool found = 1;
-  bytes data = 2;
-}
-
-message HeartbeatRequest {
-  string node_id = 1;
-  int64 timestamp = 2;
-}
-
-message HeartbeatResponse {
-  bool alive = 1;
 }
 
 message ListFilesRequest {
