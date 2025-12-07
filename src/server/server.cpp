@@ -51,8 +51,8 @@ grpc::Status FileSyncServiceImpl::UploadFile(grpc::ServerContext* context, grpc:
         total_size += chunk.data().length();
         
         // Track chunk in DB (simplified)
-        db_.AddChunk(file_name, chunk.chunk_index(), 0, "primary");
-        db_.AddChunk(file_name, chunk.chunk_index(), 0, "backup");
+        db_.AddChunk(file_name, chunk.chunk_index(), "primary");
+        db_.AddChunk(file_name, chunk.chunk_index(), "backup");
     }
     
     if (outfile_primary.is_open()) outfile_primary.close();

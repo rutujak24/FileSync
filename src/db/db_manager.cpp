@@ -32,9 +32,8 @@ bool DBManager::Init() {
         CREATE TABLE IF NOT EXISTS chunks (
             file_name TEXT,
             chunk_index INTEGER,
-            shard_index INTEGER, -- 0 for original data if not erasure coded
             node_id TEXT,
-            PRIMARY KEY (file_name, chunk_index, shard_index)
+            PRIMARY KEY (file_name, chunk_index)
         );
     )";
 
@@ -99,9 +98,9 @@ std::vector<std::tuple<std::string, std::string, int64_t, int64_t>> DBManager::G
     return files;
 }
 
-bool DBManager::AddChunk(const std::string& file_name, int32_t chunk_index, int32_t shard_index, const std::string& node_id) {
-    std::string sql = "INSERT OR REPLACE INTO chunks (file_name, chunk_index, shard_index, node_id) VALUES ('" + 
-                      file_name + "', " + std::to_string(chunk_index) + ", " + std::to_string(shard_index) + ", '" + node_id + "');";
+bool DBManager::AddChunk(const std::string& file_name, int32_t chunk_index, const std::string& node_id) {
+    std::string sql = "INSERT OR REPLACE INTO chunks (file_name, chunk_index, node_id) VALUES ('" + 
+                      file_name + "', " + std::to_string(chunk_index) + ", '" + node_id + "');";
     return Execute(sql);
 }
 
