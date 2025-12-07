@@ -8,3 +8,4 @@ build/
 *.dylib
 filesync_client
 filesync_server
+storage/

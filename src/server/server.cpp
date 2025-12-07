@@ -124,18 +124,7 @@ grpc::Status FileSyncServiceImpl::DownloadFile(grpc::ServerContext* context, con
     return grpc::Status::OK;
 }
 
-grpc::Status FileSyncServiceImpl::PropagateMeta(grpc::ServerContext* context, const MetadataUpdate* request, PropagateResponse* response) {
-    return grpc::Status(grpc::StatusCode::UNIMPLEMENTED, "Not implemented yet");
-}
 
-grpc::Status FileSyncServiceImpl::FetchShard(grpc::ServerContext* context, const ShardRequest* request, ShardData* response) {
-    return grpc::Status(grpc::StatusCode::UNIMPLEMENTED, "Not implemented yet");
-}
-
-grpc::Status FileSyncServiceImpl::Heartbeat(grpc::ServerContext* context, const HeartbeatRequest* request, HeartbeatResponse* response) {
-    response->set_alive(true);
-    return grpc::Status::OK;
-}
 
 grpc::Status FileSyncServiceImpl::ListFiles(grpc::ServerContext* context, const ListFilesRequest* request, FileListResponse* response) {
     auto files = db_.GetAllFiles();
