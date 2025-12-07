@@ -4,22 +4,36 @@ package filesync;
 
 service CRDTService {
   // Client -> Server or Server -> Server: Apply a CRDT update
-  rpc ApplyCRDTUpdate(CRDTUpdate) returns (CRDTResponse);
+  rpc ApplyCRDTUpdate(CRDTOperation) returns (CRDTResponse);
   
   // Get the current CRDT state for a file
   rpc GetCRDTState(CRDTStateRequest) returns (CRDTStateResponse);
 }
 
-message CRDTUpdate {
-  string file_name = 1;
-  string client_id = 2;
-  bytes operation = 3; // Serialized CRDT operation (e.g., insert/delete)
-  int64 timestamp = 4;
+message CRDTOperation {
+  enum Type {
+    INSERT = 0;
+    DELETE = 1;
+  }
+  Type type = 1;
+  string file_name = 2;
+  string site_id = 3;
+  int32 clock = 4;
+  
+  // For RGA (Replicated Growable Array)
+  // ID of the character to the left of the insertion point
+  string origin_left_site = 5;
+  int32 origin_left_clock = 6;
+  
+  string content = 7; // The character(s)
+  
+  // For Delete: ID of the character to delete
+  string target_site = 8;
+  int32 target_clock = 9;
 }
 
 message CRDTResponse {
   bool success = 1;
-  int64 current_version = 2;
 }
 
 message CRDTStateRequest {
@@ -27,6 +41,7 @@ message CRDTStateRequest {
 }
 
 message CRDTStateResponse {
-  bytes state = 1; // Full serialized CRDT state
-  int64 version = 2;
+  // Serialized state (simplified for now: just the text content)
+  string content = 1; 
+  // In a real system, we'd send the full RGA structure
 }

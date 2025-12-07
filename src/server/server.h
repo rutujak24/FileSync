@@ -4,6 +4,7 @@
 #include "filesync.grpc.pb.h"
 #include "crdt.grpc.pb.h"
 #include "../db/db_manager.h"
+#include "../common/crdt_manager.h"
 
 namespace filesync {
 
@@ -23,8 +24,12 @@ private:
 
 class CRDTServiceImpl final : public CRDTService::Service {
 public:
-    grpc::Status ApplyCRDTUpdate(grpc::ServerContext* context, const CRDTUpdate* request, CRDTResponse* response) override;
+    CRDTServiceImpl();
+    grpc::Status ApplyCRDTUpdate(grpc::ServerContext* context, const CRDTOperation* request, CRDTResponse* response) override;
     grpc::Status GetCRDTState(grpc::ServerContext* context, const CRDTStateRequest* request, CRDTStateResponse* response) override;
+
+private:
+    CRDTManager crdt_manager_;
 };
 
 void RunServer(const std::string& server_address, const std::string& db_path);

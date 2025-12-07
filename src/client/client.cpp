@@ -6,8 +6,52 @@
 
 namespace filesync {
 
-FileSyncClient::FileSyncClient(std::shared_ptr<grpc::Channel> channel)
-    : stub_(FileSyncService::NewStub(channel)), crdt_stub_(CRDTService::NewStub(channel)) {}
+FileSyncClient::FileSyncClient(std::shared_ptr<grpc::Channel> channel, std::string client_id)
+    : stub_(FileSyncService::NewStub(channel)), crdt_stub_(CRDTService::NewStub(channel)), crdt_manager_(client_id) {}
+
+bool FileSyncClient::EditFile(const std::string& file_name, int index, char content) {
+    // 1. Apply locally
+    auto op = crdt_manager_.LocalInsert(file_name, index, content);
+    
+    // 2. Send to server
+    CRDTOperation request;
+    request.set_type(CRDTOperation::INSERT);
+    request.set_file_name(file_name);
+    request.set_site_id(op.id.site_id);
+    request.set_clock(op.id.clock);
+    request.set_origin_left_site(op.origin_left.site_id);
+    request.set_origin_left_clock(op.origin_left.clock);
+    request.set_content(std::string(1, content));
+    
+    CRDTResponse response;
+    grpc::ClientContext context;
+    
+    grpc::Status status = crdt_stub_->ApplyCRDTUpdate(&context, request, &response);
+    if (status.ok()) {
+        std::cout << "Edit applied successfully." << std::endl;
+        return true;
+    } else {
+        std::cout << "Edit failed: " << status.error_message() << std::endl;
+        return false;
+    }
+}
+
+bool FileSyncClient::GetCRDTState(const std::string& file_name) {
+    CRDTStateRequest request;
+    request.set_file_name(file_name);
+    
+    CRDTStateResponse response;
+    grpc::ClientContext context;
+    
+    grpc::Status status = crdt_stub_->GetCRDTState(&context, request, &response);
+    if (status.ok()) {
+        std::cout << "Current File Content: " << response.content() << std::endl;
+        return true;
+    } else {
+        std::cout << "Failed to get state: " << status.error_message() << std::endl;
+        return false;
+    }
+}
 
 bool FileSyncClient::UploadFile(const std::string& file_path) {
     std::ifstream infile(file_path, std::ios::binary);

@@ -56,9 +56,9 @@ include_directories(${GRPC_INCLUDE_DIRS})
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 # Server
-add_executable(filesync_server src/server/main.cpp src/server/server.cpp src/db/db_manager.cpp src/common/utils.cpp)
+add_executable(filesync_server src/server/main.cpp src/server/server.cpp src/db/db_manager.cpp src/common/utils.cpp src/common/crdt_manager.cpp)
 target_link_libraries(filesync_server PRIVATE filesync_proto crdt_proto SQLite::SQLite3 OpenSSL::SSL OpenSSL::Crypto ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
 # Client
-add_executable(filesync_client src/client/main.cpp src/client/client.cpp src/common/utils.cpp)
+add_executable(filesync_client src/client/main.cpp src/client/client.cpp src/common/utils.cpp src/common/crdt_manager.cpp)
 target_link_libraries(filesync_client PRIVATE filesync_proto crdt_proto OpenSSL::SSL OpenSSL::Crypto ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})
