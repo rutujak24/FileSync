@@ -104,12 +104,32 @@ grpc::Status FileSyncServiceImpl::Heartbeat(grpc::ServerContext* context, const 
     return grpc::Status::OK;
 }
 
-grpc::Status CRDTServiceImpl::ApplyCRDTUpdate(grpc::ServerContext* context, const CRDTUpdate* request, CRDTResponse* response) {
-    return grpc::Status(grpc::StatusCode::UNIMPLEMENTED, "Not implemented yet");
+CRDTServiceImpl::CRDTServiceImpl() : crdt_manager_("server") {}
+
+grpc::Status CRDTServiceImpl::ApplyCRDTUpdate(grpc::ServerContext* context, const CRDTOperation* request, CRDTResponse* response) {
+    std::string file_name = request->file_name();
+    
+    if (request->type() == CRDTOperation::INSERT) {
+        CharID id = {request->site_id(), request->clock()};
+        CharID origin_left = {request->origin_left_site(), request->origin_left_clock()};
+        char content = request->content()[0];
+        
+        crdt_manager_.ApplyInsert(file_name, content, id, origin_left);
+        std::cout << "Applied Insert: " << content << " from " << request->site_id() << std::endl;
+    } else if (request->type() == CRDTOperation::DELETE) {
+        CharID target_id = {request->target_site(), request->target_clock()};
+        crdt_manager_.ApplyDelete(file_name, target_id);
+        std::cout << "Applied Delete from " << request->site_id() << std::endl;
+    }
+    
+    response->set_success(true);
+    return grpc::Status::OK;
 }
 
 grpc::Status CRDTServiceImpl::GetCRDTState(grpc::ServerContext* context, const CRDTStateRequest* request, CRDTStateResponse* response) {
-    return grpc::Status(grpc::StatusCode::UNIMPLEMENTED, "Not implemented yet");
+    std::string text = crdt_manager_.GetText(request->file_name());
+    response->set_content(text);
+    return grpc::Status::OK;
 }
 
 void RunServer(const std::string& server_address, const std::string& db_path) {
