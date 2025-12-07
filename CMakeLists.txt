@@ -9,6 +9,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GRPC REQUIRED grpc++)
 pkg_check_modules(PROTOBUF REQUIRED protobuf)
 find_package(SQLite3 REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 # Find Protobuf compiler and gRPC plugin
 find_program(Protobuf_PROTOC_EXECUTABLE protoc)
@@ -55,9 +56,9 @@ include_directories(${GRPC_INCLUDE_DIRS})
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 # Server
-add_executable(filesync_server src/server/main.cpp src/server/server.cpp src/db/db_manager.cpp)
-target_link_libraries(filesync_server PRIVATE filesync_proto crdt_proto SQLite::SQLite3 ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})
+add_executable(filesync_server src/server/main.cpp src/server/server.cpp src/db/db_manager.cpp src/common/utils.cpp)
+target_link_libraries(filesync_server PRIVATE filesync_proto crdt_proto SQLite::SQLite3 OpenSSL::SSL OpenSSL::Crypto ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
 # Client
-add_executable(filesync_client src/client/main.cpp src/client/client.cpp)
-target_link_libraries(filesync_client PRIVATE filesync_proto crdt_proto ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})
+add_executable(filesync_client src/client/main.cpp src/client/client.cpp src/common/utils.cpp)
+target_link_libraries(filesync_client PRIVATE filesync_proto crdt_proto OpenSSL::SSL OpenSSL::Crypto ${GRPC_LIBRARIES} ${PROTOBUF_LIBRARIES})

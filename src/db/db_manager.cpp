@@ -51,4 +51,36 @@ bool DBManager::Execute(const std::string& sql) {
     return true;
 }
 
+bool DBManager::AddFile(const std::string& name, const std::string& hash, int64_t size, int64_t timestamp) {
+    std::string sql = "INSERT OR REPLACE INTO files (name, version, hash, size, is_deleted, timestamp) VALUES ('" + 
+                      name + "', 1, '" + hash + "', " + std::to_string(size) + ", 0, " + std::to_string(timestamp) + ");";
+    return Execute(sql);
+}
+
+bool DBManager::GetFile(const std::string& name, std::string& hash, int64_t& size, int64_t& timestamp) {
+    std::string sql = "SELECT hash, size, timestamp FROM files WHERE name = '" + name + "';";
+    sqlite3_stmt* stmt;
+    
+    if (sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+        return false;
+    }
+    
+    bool found = false;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        size = sqlite3_column_int64(stmt, 1);
+        timestamp = sqlite3_column_int64(stmt, 2);
+        found = true;
+    }
+    
+    sqlite3_finalize(stmt);
+    return found;
+}
+
+bool DBManager::AddChunk(const std::string& file_name, int32_t chunk_index, int32_t shard_index, const std::string& node_id) {
+    std::string sql = "INSERT OR REPLACE INTO chunks (file_name, chunk_index, shard_index, node_id) VALUES ('" + 
+                      file_name + "', " + std::to_string(chunk_index) + ", " + std::to_string(shard_index) + ", '" + node_id + "');";
+    return Execute(sql);
+}
+
 } // namespace filesync
