@@ -27,8 +27,8 @@ Ensures your data is safe even if a disk fails.
 ```mermaid
 graph TD
     User[User] -->|CLI Commands| Client[Client Node]
-    Client <-->|gRPC (File Transfer)| Server[Server Node]
-    Client <-->|gRPC (CRDT Updates)| Server
+    Client <-->|"gRPC (File Transfer)"| Server[Server Node]
+    Client <-->|"gRPC (CRDT Updates)"| Server
     
     subgraph Server Node
         Service[gRPC Service]
@@ -41,6 +41,24 @@ graph TD
     Service -->|Write| Primary[Primary Storage]
     Service -->|Replicate| Backup[Backup Storage]
 ```
+
+### Database Schema (SQLite)
+The system uses two main tables to track files and storage chunks.
+
+**Table: `files`**
+| Column | Type | Description |
+|--------|------|-------------|
+| `name` | TEXT | Unique file name (Primary Key) |
+| `hash` | TEXT | SHA256 hash of the file content |
+| `size` | INTEGER | Size in bytes |
+| `timestamp` | INTEGER | Last modification time |
+
+**Table: `chunks`**
+| Column | Type | Description |
+|--------|------|-------------|
+| `file_name` | TEXT | Foreign key to `files` |
+| `chunk_index` | INTEGER | Sequence number of the chunk |
+| `node_id` | TEXT | Storage node identifier (e.g., "primary") |
 
 ### Low-Level Design (LLD)
 ```mermaid
