@@ -17,6 +17,7 @@ public:
     grpc::Status PropagateMeta(grpc::ServerContext* context, const MetadataUpdate* request, PropagateResponse* response) override;
     grpc::Status FetchShard(grpc::ServerContext* context, const ShardRequest* request, ShardData* response) override;
     grpc::Status Heartbeat(grpc::ServerContext* context, const HeartbeatRequest* request, HeartbeatResponse* response) override;
+    grpc::Status ListFiles(grpc::ServerContext* context, const ListFilesRequest* request, FileListResponse* response) override;
 
 private:
     DBManager& db_;

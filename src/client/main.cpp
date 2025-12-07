@@ -24,8 +24,11 @@ int main(int argc, char** argv) {
         } else if (command == "cat" && argc > 2) {
             // ./filesync_client cat <file>
             client.GetCRDTState(argv[2]);
+        } else if (command == "sync") {
+            // ./filesync_client sync
+            client.Sync();
         } else if (command == "interactive") {
-            std::cout << "Entering interactive mode. Commands: upload, download, edit, cat, exit" << std::endl;
+            std::cout << "Entering interactive mode. Commands: upload, download, edit, cat, sync, exit" << std::endl;
             std::string line;
             while (std::cout << "> " && std::getline(std::cin, line)) {
                 std::stringstream ss(line);
@@ -49,6 +52,8 @@ int main(int argc, char** argv) {
                 } else if (cmd == "cat") {
                     std::string name;
                     if (ss >> name) client.GetCRDTState(name);
+                } else if (cmd == "sync") {
+                    client.Sync();
                 } else {
                     std::cout << "Unknown command" << std::endl;
                 }
@@ -56,6 +61,7 @@ int main(int argc, char** argv) {
         } else {
             std::cout << "Usage: " << std::endl;
             std::cout << "  ./filesync_client interactive" << std::endl;
+            std::cout << "  ./filesync_client sync" << std::endl;
             std::cout << "  ./filesync_client upload <file>" << std::endl;
             std::cout << "  ./filesync_client download <file_name> <dest_path>" << std::endl;
             std::cout << "  ./filesync_client edit <file_name> <index> <char>" << std::endl;

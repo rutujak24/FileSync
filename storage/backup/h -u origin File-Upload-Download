@@ -1,0 +1,53 @@
+[33mcommit 2e8dffc816fdc61462e79fba90b8f3c1ba883384[m[33m ([m[1;36mHEAD -> [m[1;32mFile-Upload-Download[m[33m, [m[1;31morigin/architecture-and-skeleton[m[33m, [m[1;31morigin/File-Upload-Download[m[33m)[m
+Author: rkawade3 <rkawade3@gatech.edu>
+Date:   Sat Dec 6 18:56:29 2025 -0500
+
+    Fix: Remove build artifacts and add .gitignore
+
+[33mcommit 58632d1c43c8af648667e995cadcf59d1efbfd31[m[33m ([m[1;32mmain[m[33m)[m
+Author: rkawade3 <rkawade3@gatech.edu>
+Date:   Sat Dec 6 18:52:12 2025 -0500
+
+    Adding CLient-Server Skeleton
+
+[33mcommit bbb251d9e4b441bf99c13ef0029fe1f9ff015621[m
+Author: rkawade3 <rkawade3@gatech.edu>
+Date:   Sat Dec 6 18:51:53 2025 -0500
+
+    Adding CLient-Server Skeleton
+
+[33mcommit eaf05e784e4324ccfe80e8c87dc879cb458a9b51[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Rutuja Kawade <56619747+rutujak24@users.noreply.github.com>
+Date:   Fri Dec 5 11:09:39 2025 +0530
+
+    Revise 10-Day Plan tasks and structure in README
+    
+    Updated the 10-Day Plan in README to reflect changes in task descriptions and organization.
+
+[33mcommit ba1407c191faabd4211ee00613d52652bdc5efef[m
+Author: Rutuja Kawade <56619747+rutujak24@users.noreply.github.com>
+Date:   Fri Dec 5 11:08:04 2025 +0530
+
+    Fix formatting of 10-Day Plan section header
+
+[33mcommit f4a32e1f095339f2acf0764e758afe478c90c2f8[m
+Author: Rutuja Kawade <56619747+rutujak24@users.noreply.github.com>
+Date:   Fri Dec 5 11:07:43 2025 +0530
+
+    Update README with detailed 10-Day Plan
+    
+    Expanded the 10-Day Plan with detailed tasks for each day.
+
+[33mcommit 0795649eb6ec76ddbd9c7ea8125c2a7c03ade0b6[m
+Author: Rutuja Kawade <56619747+rutujak24@users.noreply.github.com>
+Date:   Fri Dec 5 10:46:30 2025 +0530
+
+    Enhance README with project details and features
+    
+    Added project goals, architecture overview, and features to README.
+
+[33mcommit 33d48563caba9151b6422c6fd581b1c3381a5e05[m
+Author: Rutuja Kawade <56619747+rutujak24@users.noreply.github.com>
+Date:   Fri Dec 5 10:45:27 2025 +0530
+
+    Initial commit

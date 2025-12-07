@@ -137,6 +137,18 @@ grpc::Status FileSyncServiceImpl::Heartbeat(grpc::ServerContext* context, const 
     return grpc::Status::OK;
 }
 
+grpc::Status FileSyncServiceImpl::ListFiles(grpc::ServerContext* context, const ListFilesRequest* request, FileListResponse* response) {
+    auto files = db_.GetAllFiles();
+    for (const auto& file : files) {
+        auto* file_info = response->add_files();
+        file_info->set_file_name(std::get<0>(file));
+        file_info->set_file_hash(std::get<1>(file));
+        file_info->set_file_size(std::get<2>(file));
+        file_info->set_timestamp(std::get<3>(file));
+    }
+    return grpc::Status::OK;
+}
+
 CRDTServiceImpl::CRDTServiceImpl() : crdt_manager_("server") {}
 
 grpc::Status CRDTServiceImpl::ApplyCRDTUpdate(grpc::ServerContext* context, const CRDTOperation* request, CRDTResponse* response) {

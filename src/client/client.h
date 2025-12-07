@@ -16,8 +16,9 @@ public:
     bool DownloadFile(const std::string& file_name, const std::string& dest_path);
     
     // CRDT Operations
-    bool EditFile(const std::string& file_name, int index, char content);
-    bool GetCRDTState(const std::string& file_name);
+    void EditFile(const std::string& file_name, int index, char content);
+    void GetCRDTState(const std::string& file_name);
+    void Sync();
 
 private:
     std::unique_ptr<FileSyncService::Stub> stub_;

@@ -77,6 +77,27 @@ bool DBManager::GetFile(const std::string& name, std::string& hash, int64_t& siz
     return found;
 }
 
+std::vector<std::tuple<std::string, std::string, int64_t, int64_t>> DBManager::GetAllFiles() {
+    std::vector<std::tuple<std::string, std::string, int64_t, int64_t>> files;
+    std::string sql = "SELECT name, hash, size, timestamp FROM files WHERE is_deleted = 0;";
+    sqlite3_stmt* stmt;
+    
+    if (sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0) != SQLITE_OK) {
+        return files;
+    }
+    
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        std::string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        std::string hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        int64_t size = sqlite3_column_int64(stmt, 2);
+        int64_t timestamp = sqlite3_column_int64(stmt, 3);
+        files.emplace_back(name, hash, size, timestamp);
+    }
+    
+    sqlite3_finalize(stmt);
+    return files;
+}
+
 bool DBManager::AddChunk(const std::string& file_name, int32_t chunk_index, int32_t shard_index, const std::string& node_id) {
     std::string sql = "INSERT OR REPLACE INTO chunks (file_name, chunk_index, shard_index, node_id) VALUES ('" + 
                       file_name + "', " + std::to_string(chunk_index) + ", " + std::to_string(shard_index) + ", '" + node_id + "');";

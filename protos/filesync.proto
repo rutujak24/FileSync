@@ -15,8 +15,11 @@ service FileSyncService {
   // Server -> Server: Fetch a specific shard for reconstruction
   rpc FetchShard(ShardRequest) returns (ShardData);
 
-  // Server -> Server: Heartbeat for failure detection
+  // Server -> Server: Heartbeat for failure  // Heartbeat check
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // List all files (for Sync)
+  rpc ListFiles(ListFilesRequest) returns (FileListResponse);
 }
 
 message FileChunk {
@@ -71,4 +74,19 @@ message HeartbeatRequest {
 
 message HeartbeatResponse {
   bool alive = 1;
+}
+
+message ListFilesRequest {
+  // Empty for now
+}
+
+message FileInfo {
+  string file_name = 1;
+  string file_hash = 2;
+  int64 file_size = 3;
+  int64 timestamp = 4;
+}
+
+message FileListResponse {
+  repeated FileInfo files = 1;
 }

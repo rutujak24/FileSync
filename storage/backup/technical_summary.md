@@ -41,30 +41,21 @@ We implemented a fault-tolerant storage layer using **Simple Replication**.
     -   If the primary file is missing or corrupted, it catches the error and seamlessly switches to reading from `storage/backup/`.
     -   This provides **High Availability** against single-disk failures.
 
-### Day 5: Full Multi-Node Sync
-We tied everything together with a **Bidirectional Sync** command.
--   **Discovery**: Client calls `ListFiles` to get the server's state.
--   **Reconciliation**:
-    -   **Download**: If a file is on the server but not local (or hash differs), download it.
-    -   **Upload**: If a file is local but not on the server, upload it.
--   **Result**: A "Dropbox-like" experience where folders stay in sync.
-
 ## 4. Key Source Files
 -   **`src/server/server.cpp`**: The brain of the operation. Handles gRPC requests, writes files to disk (primary & backup), and updates the SQLite DB.
--   **`src/client/client.cpp`**: The user interface. Reads local files, streams them to the server, handles user input for editing, and performs sync.
+-   **`src/client/client.cpp`**: The user interface. Reads local files, streams them to the server, and handles user input for editing.
 -   **`src/common/crdt_manager.cpp`**: The algorithmic core. Contains the logic for `ApplyInsert` and `ApplyDelete` using RGA rules.
 -   **`src/db/db_manager.cpp`**: The persistence layer. Wraps SQLite C API for safe SQL execution.
 
 ## 5. Demo Guide (How to Verify)
 
-### Test 1: Full Sync
+### Test 1: File Upload/Download & Failover
 1.  **Start Server**: `./build/filesync_server`
-2.  **Create Local File**: `echo "My Data" > my_data.txt`
-3.  **Sync**: `./build/filesync_client sync`
-    -   *Check*: Server logs "File uploaded...".
-4.  **Delete Local File**: `rm my_data.txt`
-5.  **Sync**: `./build/filesync_client sync`
-    -   *Check*: Client logs "Downloading missing file...". File reappears.
+2.  **Upload**: `./build/filesync_client upload test_data.bin`
+    -   *Check*: File exists in `storage/primary/` AND `storage/backup/`.
+3.  **Simulate Failure**: `rm storage/primary/test_data.bin`
+4.  **Download**: `./build/filesync_client download test_data.bin restored.bin`
+    -   *Check*: Server logs "Recovered ... from Backup". Download succeeds.
 
 ### Test 2: Collaborative Editing (CRDT)
 1.  **Start Server**: `./build/filesync_server`
