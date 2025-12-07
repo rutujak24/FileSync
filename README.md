@@ -23,6 +23,56 @@ Ensures your data is safe even if a disk fails.
 
 ## Architecture
 
+### High-Level Logic (HLL)
+```mermaid
+graph TD
+    User[User] -->|CLI Commands| Client[Client Node]
+    Client <-->|gRPC (File Transfer)| Server[Server Node]
+    Client <-->|gRPC (CRDT Updates)| Server
+    
+    subgraph Server Node
+        Service[gRPC Service]
+        DB[(SQLite Metadata)]
+        CRDT[CRDT Engine]
+    end
+    
+    Service --> DB
+    Service --> CRDT
+    Service -->|Write| Primary[Primary Storage]
+    Service -->|Replicate| Backup[Backup Storage]
+```
+
+### Low-Level Design (LLD)
+```mermaid
+classDiagram
+    class FileSyncClient {
+        +UploadFile()
+        +DownloadFile()
+        +Sync()
+        +EditFile()
+    }
+    class CRDTManager {
+        +LocalInsert()
+        +ApplyInsert()
+        +GetText()
+    }
+    class FileSyncServiceImpl {
+        +UploadFile()
+        +DownloadFile()
+        +ListFiles()
+    }
+    class DBManager {
+        +AddFile()
+        +GetFile()
+        +AddChunk()
+    }
+    
+    FileSyncClient --> CRDTManager : Uses
+    FileSyncServiceImpl --> DBManager : Uses
+    FileSyncServiceImpl --> CRDTManager : Uses
+```
+
+### Component Details
 1.  **Client**:
     -   Command-line interface (CLI) for user interaction.
     -   Handles file scanning, hashing, and uploading/downloading.
