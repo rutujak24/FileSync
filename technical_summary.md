@@ -31,35 +31,31 @@ We implemented robust file upload and download capabilities.
         -   `files`: Stores `name`, `hash`, `size`, `timestamp`.
         -   `chunks`: Maps file chunks to storage nodes (preparation for distributed storage).
 
-### Day 3: CRDT Merge Engine (Collaborative Editing)
-We implemented a custom **Replicated Growable Array (RGA)** to handle concurrent text edits.
--   **Algorithm**: RGA treats text as a linked list where each character has a unique ID and a reference to its "left origin".
--   **Data Structure** (`src/common/crdt_manager.h`):
-    ```cpp
-    struct CharID { string site_id; int32_t clock; };
-    struct RGANode { CharID id; char content; CharID origin_left; };
-    ```
--   **Conflict Resolution**:
-    -   If two users insert at the same position, the character with the **higher ID** (logical clock + site ID) wins and is placed to the right.
-    -   Deletions are "tombstones" (marked as `is_deleted = true`) rather than physical removals, ensuring causality is preserved.
--   **Interactive Client**:
-    -   Added `interactive` mode to `src/client/main.cpp`.
-    -   This keeps the process alive, maintaining the **Logical Clock** state so sequential edits are correctly ordered.
+### Day 4: Simple Replication & Failover
+We implemented a fault-tolerant storage layer using **Simple Replication**.
+-   **Dual-Write Strategy**:
+    -   `UploadFile` writes the incoming stream to both `storage/primary/` and `storage/backup/`.
+    -   This ensures that we always have two copies of every file.
+-   **Failover Mechanism**:
+    -   `DownloadFile` attempts to read from `storage/primary/` first.
+    -   If the primary file is missing or corrupted, it catches the error and seamlessly switches to reading from `storage/backup/`.
+    -   This provides **High Availability** against single-disk failures.
 
 ## 4. Key Source Files
--   **`src/server/server.cpp`**: The brain of the operation. Handles gRPC requests, writes files to disk, and updates the SQLite DB.
+-   **`src/server/server.cpp`**: The brain of the operation. Handles gRPC requests, writes files to disk (primary & backup), and updates the SQLite DB.
 -   **`src/client/client.cpp`**: The user interface. Reads local files, streams them to the server, and handles user input for editing.
 -   **`src/common/crdt_manager.cpp`**: The algorithmic core. Contains the logic for `ApplyInsert` and `ApplyDelete` using RGA rules.
 -   **`src/db/db_manager.cpp`**: The persistence layer. Wraps SQLite C API for safe SQL execution.
 
 ## 5. Demo Guide (How to Verify)
 
-### Test 1: File Upload/Download
+### Test 1: File Upload/Download & Failover
 1.  **Start Server**: `./build/filesync_server`
 2.  **Upload**: `./build/filesync_client upload test_data.bin`
-    -   *Check*: Server logs "File uploaded... Hash: ..."
-3.  **Download**: `./build/filesync_client download test_data.bin restored.bin`
-    -   *Check*: `diff test_data.bin restored.bin` (Should be empty/identical).
+    -   *Check*: File exists in `storage/primary/` AND `storage/backup/`.
+3.  **Simulate Failure**: `rm storage/primary/test_data.bin`
+4.  **Download**: `./build/filesync_client download test_data.bin restored.bin`
+    -   *Check*: Server logs "Recovered ... from Backup". Download succeeds.
 
 ### Test 2: Collaborative Editing (CRDT)
 1.  **Start Server**: `./build/filesync_server`

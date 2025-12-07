@@ -13,7 +13,7 @@ FileSyncServiceImpl::FileSyncServiceImpl(DBManager& db) : db_(db) {}
 
 grpc::Status FileSyncServiceImpl::UploadFile(grpc::ServerContext* context, grpc::ServerReader<FileChunk>* reader, UploadResponse* response) {
     FileChunk chunk;
-    std::ofstream outfile;
+    std::ofstream outfile_primary, outfile_backup;
     std::string file_name;
     int64_t total_size = 0;
     bool first_chunk = true;
@@ -21,32 +21,52 @@ grpc::Status FileSyncServiceImpl::UploadFile(grpc::ServerContext* context, grpc:
     while (reader->Read(&chunk)) {
         if (first_chunk) {
             file_name = chunk.file_name();
-            // TODO: Use a specific storage directory
-            outfile.open(file_name, std::ios::binary);
-            if (!outfile.is_open()) {
-                return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for writing");
+            
+            // Open Primary
+            outfile_primary.open("storage/primary/" + file_name, std::ios::binary);
+            if (!outfile_primary.is_open()) {
+                return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open primary file for writing");
             }
+            
+            // Open Backup (Replication)
+            outfile_backup.open("storage/backup/" + file_name, std::ios::binary);
+            if (!outfile_backup.is_open()) {
+                std::cerr << "Warning: Failed to open backup file for writing" << std::endl;
+            } else {
+                std::cout << "Replicating " << file_name << " to backup..." << std::endl;
+            }
+            
             first_chunk = false;
         }
-        outfile.write(chunk.data().c_str(), chunk.data().length());
+        
+        // Write to Primary
+        outfile_primary.write(chunk.data().c_str(), chunk.data().length());
+        
+        // Write to Backup
+        if (outfile_backup.is_open()) {
+            outfile_backup.write(chunk.data().c_str(), chunk.data().length());
+        }
+        
         total_size += chunk.data().length();
         
-        // Track chunk in DB (simplified for now, assuming local storage)
-        db_.AddChunk(file_name, chunk.chunk_index(), 0, "localhost");
+        // Track chunk in DB (simplified)
+        db_.AddChunk(file_name, chunk.chunk_index(), 0, "primary");
+        db_.AddChunk(file_name, chunk.chunk_index(), 0, "backup");
     }
     
-    if (outfile.is_open()) {
-        outfile.close();
-    }
+    if (outfile_primary.is_open()) outfile_primary.close();
+    if (outfile_backup.is_open()) outfile_backup.close();
 
     // Calculate hash and update DB
-    std::string hash = utils::CalculateSHA256(file_name);
+    // Note: In a real system we'd hash the stream or the saved file. 
+    // Here we hash the primary.
+    std::string hash = utils::CalculateSHA256("storage/primary/" + file_name);
     int64_t timestamp = std::time(nullptr);
     db_.AddFile(file_name, hash, total_size, timestamp);
 
     response->set_success(true);
-    response->set_message("Upload successful");
-    response->set_file_id(file_name); // Simple ID for now
+    response->set_message("Upload successful (Replicated to Primary & Backup)");
+    response->set_file_id(file_name);
     
     std::cout << "File uploaded: " << file_name << " Size: " << total_size << " Hash: " << hash << std::endl;
     return grpc::Status::OK;
@@ -61,9 +81,22 @@ grpc::Status FileSyncServiceImpl::DownloadFile(grpc::ServerContext* context, con
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "File not found in metadata");
     }
 
-    std::ifstream infile(file_name, std::ios::binary);
+    // Try Primary
+    std::string file_path = "storage/primary/" + file_name;
+    std::ifstream infile(file_path, std::ios::binary);
+    
     if (!infile.is_open()) {
-        return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for reading");
+        std::cerr << "Primary storage failed for " << file_name << ". Attempting failover..." << std::endl;
+        // Failover to Backup
+        file_path = "storage/backup/" + file_name;
+        infile.open(file_path, std::ios::binary);
+        
+        if (!infile.is_open()) {
+            return grpc::Status(grpc::StatusCode::INTERNAL, "File lost! Failed to open from Primary and Backup.");
+        }
+        std::cout << "Recovered " << file_name << " from Backup storage." << std::endl;
+    } else {
+        std::cout << "Serving " << file_name << " from Primary storage." << std::endl;
     }
 
     const size_t kChunkSize = 1024 * 1024; // 1MB chunks
