@@ -2,6 +2,10 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <fstream>
+#include <vector>
+#include <ctime>
+#include "../common/utils.h"
 
 namespace filesync {
 
@@ -9,18 +13,82 @@ FileSyncServiceImpl::FileSyncServiceImpl(DBManager& db) : db_(db) {}
 
 grpc::Status FileSyncServiceImpl::UploadFile(grpc::ServerContext* context, grpc::ServerReader<FileChunk>* reader, UploadResponse* response) {
     FileChunk chunk;
+    std::ofstream outfile;
+    std::string file_name;
+    int64_t total_size = 0;
+    bool first_chunk = true;
+
     while (reader->Read(&chunk)) {
-        // TODO: Store chunk
-        std::cout << "Received chunk for file: " << chunk.file_name() << " index: " << chunk.chunk_index() << std::endl;
+        if (first_chunk) {
+            file_name = chunk.file_name();
+            // TODO: Use a specific storage directory
+            outfile.open(file_name, std::ios::binary);
+            if (!outfile.is_open()) {
+                return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for writing");
+            }
+            first_chunk = false;
+        }
+        outfile.write(chunk.data().c_str(), chunk.data().length());
+        total_size += chunk.data().length();
+        
+        // Track chunk in DB (simplified for now, assuming local storage)
+        db_.AddChunk(file_name, chunk.chunk_index(), 0, "localhost");
     }
+    
+    if (outfile.is_open()) {
+        outfile.close();
+    }
+
+    // Calculate hash and update DB
+    std::string hash = utils::CalculateSHA256(file_name);
+    int64_t timestamp = std::time(nullptr);
+    db_.AddFile(file_name, hash, total_size, timestamp);
+
     response->set_success(true);
-    response->set_message("Upload successful (stub)");
+    response->set_message("Upload successful");
+    response->set_file_id(file_name); // Simple ID for now
+    
+    std::cout << "File uploaded: " << file_name << " Size: " << total_size << " Hash: " << hash << std::endl;
     return grpc::Status::OK;
 }
 
 grpc::Status FileSyncServiceImpl::DownloadFile(grpc::ServerContext* context, const FileRequest* request, grpc::ServerWriter<FileChunk>* writer) {
-    // TODO: Read file and stream chunks
-    return grpc::Status(grpc::StatusCode::UNIMPLEMENTED, "Not implemented yet");
+    std::string file_name = request->file_name();
+    std::string hash;
+    int64_t size, timestamp;
+    
+    if (!db_.GetFile(file_name, hash, size, timestamp)) {
+        return grpc::Status(grpc::StatusCode::NOT_FOUND, "File not found in metadata");
+    }
+
+    std::ifstream infile(file_name, std::ios::binary);
+    if (!infile.is_open()) {
+        return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to open file for reading");
+    }
+
+    const size_t kChunkSize = 1024 * 1024; // 1MB chunks
+    std::vector<char> buffer(kChunkSize);
+    int32_t chunk_index = 0;
+
+    while (infile.read(buffer.data(), kChunkSize) || infile.gcount() > 0) {
+        FileChunk chunk;
+        chunk.set_file_name(file_name);
+        chunk.set_chunk_index(chunk_index++);
+        chunk.set_data(buffer.data(), infile.gcount());
+        chunk.set_is_last_chunk(infile.eof());
+        if (chunk_index == 1) {
+             chunk.set_total_size(size);
+             chunk.set_file_hash(hash);
+        }
+        
+        if (!writer->Write(chunk)) {
+            return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to write chunk to stream");
+        }
+        
+        if (infile.eof()) break;
+    }
+
+    return grpc::Status::OK;
 }
 
 grpc::Status FileSyncServiceImpl::PropagateMeta(grpc::ServerContext* context, const MetadataUpdate* request, PropagateResponse* response) {
