@@ -1,4 +1,5 @@
 syntax = "proto3";
+// CRDT protocol definitions
 
 package filesync;
 

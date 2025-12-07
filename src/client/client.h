@@ -1,4 +1,5 @@
 #pragma once
+// Client header
 
 #include <grpcpp/grpcpp.h>
 #include "filesync.grpc.pb.h"
