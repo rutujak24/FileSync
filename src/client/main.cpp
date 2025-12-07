@@ -1,5 +1,4 @@
 #include "client.h"
-// Client entry point
 #include <iostream>
 #include <ctime>
 #include <sstream>

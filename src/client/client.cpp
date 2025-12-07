@@ -1,5 +1,4 @@
 #include "client.h"
-// Client implementation logic
 #include "../common/utils.h"
 #include <fstream>
 #include <iostream>

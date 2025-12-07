@@ -1,63 +1,79 @@
-# FileSync++: A Distributed, Fault-Tolerant, CRDT-Enhanced, Erasure-Coded File Synchronization System
+# FileSync++: Distributed File Synchronization with CRDTs
 
-*FileSync++* is a high-performance, multi-node file synchronization platform designed in **C++** and built on **gRPC microservices**. The system enables reliable file uploads, downloads, metadata/version management, and cross-node propagation, similar to Google Drive or Dropbox — but with two advanced features that traditional file-sync products do not provide:
+**FileSync++** is a distributed file synchronization system built in **C++** using **gRPC**. It functions like a simple version of Dropbox or Google Drive, but with a powerful enhancement: **Real-time Collaborative Editing** using Conflict-Free Replicated Data Types (CRDTs).
 
-### **1. CRDT-Based Conflict-Free Merging for Text Files**
+## Key Features
 
-Unlike conventional cloud storage systems that resolve concurrent edits using simple last-write-wins (LWW), FileSync++ integrates a **Conflict-Free Replicated Data Type (CRDT)** engine for text documents. This enables **real-time, conflict-free merging** even when multiple clients edit the same file offline. Divergent file states automatically converge without data loss, enabling true collaborative editing.
+### 1. 🔄 Bidirectional File Sync
+Automatically synchronizes files between the client and server.
+-   **Smart Sync**: Only transfers files that are missing or changed.
+-   **Efficient**: Uses SHA256 hashing to detect changes.
 
-### **2. Erasure Coding for Storage Efficiency and High Durability**
+### 2. 📝 Real-Time Collaborative Editing (CRDT)
+Supports conflict-free text editing. Multiple users can edit the same file, and the system ensures that everyone sees the same final result without merge conflicts.
+-   **Algorithm**: Implements **RGA (Replicated Growable Array)**.
+-   **Conflict-Free**: Mathematical guarantee of eventual consistency.
 
-Instead of maintaining full replicas across storage nodes, FileSync++ supports **Reed–Solomon erasure coding (k data shards + m parity shards)**. Files are split into encoded fragments and distributed across nodes, providing **fault tolerance equivalent to replication** but with **significantly lower storage overhead**. Any subset of *k* fragments can reconstruct the full file, making the system highly durable even under node failures.
-
-FileSync++ also provides:
-
-* Multi-node eventual sync
-* Server-to-server metadata/patch propagation
-* Chunk-based file streaming
-* Metadata tracking via SQLite
-* Heartbeat-based failure detection
-* Optional user-facing CLI or minimal web UI
-
-This project demonstrates expertise in **distributed systems, C++ systems engineering, consensus-free replication, fault tolerance, CRDT theory, and storage coding**.
+### 3. 🛡️ Fault Tolerance (Replication)
+Ensures your data is safe even if a disk fails.
+-   **Primary-Backup Replication**: Every uploaded file is saved to two separate storage locations (`storage/primary` and `storage/backup`).
+-   **Automatic Failover**: If the primary file is lost, the server automatically retrieves it from the backup.
 
 ---
 
-# 🌟 **Updated System Architecture (with CRDT + Erasure Coding)**
+## Architecture
 
-## **Core Components**
+1.  **Client**:
+    -   Command-line interface (CLI) for user interaction.
+    -   Handles file scanning, hashing, and uploading/downloading.
+    -   Manages local CRDT state for editing.
 
-1. **Client**
+2.  **Server**:
+    -   gRPC service handling file transfers and metadata.
+    -   **SQLite Database**: Stores file metadata (names, hashes, sizes).
+    -   **Storage Engine**: Manages dual-write replication.
 
-   * Upload/download files via gRPC
-   * Compute local diffs and hashes
-   * CRDT-enabled editor for text files
-   * Chunker + encoder for upload
+---
 
-2. **Server Node**
+## How to Build and Run
 
-   * File chunk storage
-   * Metadata store (SQLite)
-   * Erasure coding module
-   * CRDT merge engine (for text)
-   * File reconstruction module
-   * Server-to-server sync RPC handlers
+### Prerequisites
+-   C++17 Compiler
+-   CMake
+-   gRPC & Protobuf
+-   SQLite3
+-   OpenSSL
 
-3. **Sync Manager**
+### Build
+```bash
+mkdir build && cd build
+cmake ..
+make -j4
+```
 
-   * Watches metadata changes
-   * Broadcasts updates to peer nodes
-   * Manages background erasure coding sync jobs
-   * Pulls missing shards
+### Run Server
+```bash
+./filesync_server
+```
 
-4. **Distributed Storage Layer**
+### Run Client
+```bash
+# Interactive Mode (Recommended)
+./filesync_client interactive
 
-   * Stores (k+m) encoded shards
-   * Reconstructs files when needed
-   * Integrates with metadata DB
+# Commands inside interactive mode:
+> upload <file_path>
+> download <file_name> <dest_path>
+> sync
+> edit <file_name> <index> <char>
+> cat <file_name>
+```
 
-5. **Cluster Manager**
+---
 
-   * Tracks server heartbeats
-   * Detects node failures
-   * Rebalances shards if node dies
+## Project Structure
+-   `src/client/`: Client-side logic and CLI.
+-   `src/server/`: Server-side logic and storage management.
+-   `src/common/`: Shared utilities (CRDT manager, hashing).
+-   `src/db/`: Database management (SQLite).
+-   `protos/`: gRPC protocol definitions.

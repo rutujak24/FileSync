@@ -1,5 +1,4 @@
 #pragma once
-// Server header
 
 #include <grpcpp/grpcpp.h>
 #include "filesync.grpc.pb.h"
