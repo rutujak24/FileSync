@@ -2,11 +2,12 @@
 #include <iostream>
 #include <ctime>
 #include <sstream>
+#include <unistd.h>
 
 int main(int argc, char** argv) {
     std::string target_str = "localhost:50051";
     // Generate a random client ID for CRDT
-    std::srand(std::time(nullptr));
+    std::srand(std::time(nullptr) + getpid());
     std::string client_id = "client_" + std::to_string(std::rand());
     
     filesync::FileSyncClient client(grpc::CreateChannel(target_str, grpc::InsecureChannelCredentials()), client_id);
@@ -30,6 +31,8 @@ int main(int argc, char** argv) {
                 std::stringstream ss(line);
                 std::string cmd;
                 ss >> cmd;
+                
+                if (cmd.empty()) continue;
                 
                 if (cmd == "exit") break;
                 else if (cmd == "upload") {
