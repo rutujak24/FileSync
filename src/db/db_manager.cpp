@@ -1,4 +1,5 @@
 #include "db_manager.h"
+// Database management logic
 #include <iostream>
 
 namespace filesync {
