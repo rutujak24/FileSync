@@ -1,5 +1,4 @@
 #pragma once
-// Database manager header
 
 #include <string>
 #include <sqlite3.h>

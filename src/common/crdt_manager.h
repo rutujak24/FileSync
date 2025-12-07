@@ -1,5 +1,4 @@
 #pragma once
-// CRDT manager header
 
 #include <string>
 #include <vector>

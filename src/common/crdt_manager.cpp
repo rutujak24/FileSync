@@ -1,5 +1,4 @@
 #include "crdt_manager.h"
-// CRDT logic implementation
 #include <algorithm>
 
 namespace filesync {
